@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Metas — Ramsons</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f1117;
+  --card: #1a1d27;
+  --card2: #21253a;
+  --border: #2c3050;
+  --accent: #4f6ef7;
+  --accent2: #7c3aed;
+  --green: #22c55e;
+  --yellow: #f59e0b;
+  --red: #ef4444;
+  --text: #f1f5f9;
+  --muted: #64748b;
+  --muted2: #94a3b8;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; }
+
+/* HEADER */
+header {
+  background: linear-gradient(135deg, #1a1d27 0%, #21253a 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 1.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
+}
+.logo { font-size: 1.1rem; font-weight: 800; letter-spacing: -0.5px; }
+.logo span { color: var(--accent); }
+.header-info { display: flex; align-items: center; gap: 1rem; }
+.month-badge {
+  background: var(--card2); border: 1px solid var(--border);
+  padding: .35rem .8rem; border-radius: 20px; font-size: .8rem; color: var(--muted2);
+}
+.dias-badge {
+  background: rgba(79,110,247,.15); border: 1px solid rgba(79,110,247,.3);
+  padding: .35rem .8rem; border-radius: 20px; font-size: .8rem; color: var(--accent); font-weight: 600;
+}
+.status-badge {
+  display: inline-flex; align-items: center; gap: 0.5rem; 
+  padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
+}
+.status-online {
+  background: rgba(34,197,94,.15); color: var(--green); border: 1px solid rgba(34,197,94,.3);
+}
+.status-offline {
+  background: rgba(239,68,68,.15); color: var(--red); border: 1px solid rgba(239,68,68,.3);
+}
+.status-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: currentColor;
+}
+
+/* TABS */
+.tabs {
+  display: flex; gap: 0; background: var(--card);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto; padding: 0 1.5rem;
+}
+.tab {
+  padding: .85rem 1.2rem; border: none; background: none; color: var(--muted);
+  cursor: pointer; font-family: inherit; font-size: .85rem; font-weight: 500;
+  border-bottom: 2px solid transparent; white-space: nowrap; transition: all .2s;
+}
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab:hover:not(.active) { color: var(--text); }
+
+/* MAIN */
+main { padding: 1.5rem; max-width: 900px; margin: 0 auto; }
+
+/* PAGE */
+.page { display: none; }
+.page.active { display: block; }
+
+/* CARDS GRID */
+.cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+
+/* META CARD */
+.meta-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 16px; padding: 1.2rem; transition: border-color .2s;
+}
+.meta-card:hover { border-color: var(--accent); }
+.meta-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+.meta-icon { font-size: 1.5rem; }
+.meta-badge {
+  font-size: .7rem; font-weight: 600; padding: .2rem .6rem;
+  border-radius: 20px; text-transform: uppercase; letter-spacing: .05em;
+}
+.badge-ok { background: rgba(34,197,94,.15); color: var(--green); border: 1px solid rgba(34,197,94,.3); }
+.badge-atencao { background: rgba(245,158,11,.15); color: var(--yellow); border: 1px solid rgba(245,158,11,.3); }
+.badge-critico { background: rgba(239,68,68,.15); color: var(--red); border: 1px solid rgba(239,68,68,.3); }
+.meta-name { font-size: .8rem; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: .08em; margin-bottom: .3rem; }
+.meta-atual { font-size: 1.6rem; font-weight: 800; letter-spacing: -1px; }
+.meta-total { font-size: .8rem; color: var(--muted); margin-top: .1rem; }
+.progress-bar { height: 6px; background: var(--border); border-radius: 3px; margin: .9rem 0 .7rem; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 3px; transition: width .5s ease; }
+.fill-green { background: linear-gradient(90deg, #16a34a, #22c55e); }
+.fill-yellow { background: linear-gradient(90deg, #d97706, #f59e0b); }
+.fill-red { background: linear-gradient(90deg, #dc2626, #ef4444); }
+.meta-stats { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+.stat-box {
+  background: var(--card2); border-radius: 8px; padding: .6rem .7rem;
+  border: 1px solid var(--border);
+}
+.stat-label { font-size: .68rem; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: .05em; }
+.stat-value { font-size: .95rem; font-weight: 700; margin-top: .15rem; }
+.stat-value.green { color: var(--green); }
+.stat-value.yellow { color: var(--yellow); }
+.stat-value.red { color: var(--red); }
+
+/* ADD VENDA */
+.add-section {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem;
+}
+.add-section h3 { font-size: 1rem; font-weight: 700; margin-bottom: 1rem; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+@media(max-width: 500px) { .form-grid { grid-template-columns: 1fr; } }
+.form-group { display: flex; flex-direction: column; gap: .4rem; }
+.form-group label { font-size: .75rem; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: .06em; }
+.form-group select, .form-group input {
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text); font-family: inherit;
+  font-size: .9rem; padding: .6rem .9rem; outline: none; transition: border-color .2s;
+}
+.form-group select:focus, .form-group input:focus { border-color: var(--accent); }
+.form-group select option { background: var(--card2); }
+.btn-add {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: white; border: none; border-radius: 10px;
+  padding: .75rem 1.5rem; font-family: inherit; font-weight: 700; font-size: .9rem;
+  cursor: pointer; margin-top: .5rem; width: 100%; transition: opacity .2s, transform .1s;
+}
+.btn-add:hover { opacity: .9; }
+.btn-add:active { transform: scale(.98); }
+.btn-add:disabled { opacity: .5; cursor: not-allowed; }
+
+/* FILTRO DE VENDAS */
+.filter-section {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 16px; padding: 1rem 1.5rem; margin-bottom: 1.5rem;
+  display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;
+}
+.filter-group { display: flex; flex-direction: column; gap: .4rem; flex: 1; min-width: 150px; }
+.filter-group label { font-size: .75rem; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: .06em; }
+.filter-group input, .filter-group select {
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text); font-family: inherit;
+  font-size: .9rem; padding: .6rem .9rem; outline: none;
+}
+.btn-filter {
+  background: var(--accent); color: white; border: none; border-radius: 10px;
+  padding: .6rem 1.2rem; font-weight: 600; font-size: .9rem;
+  cursor: pointer; transition: opacity .2s;
+}
+.btn-filter:hover { opacity: .9; }
+
+/* HISTORICO */
+.historico-section { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; }
+.historico-section h3 { font-size: 1rem; font-weight: 700; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; }
+.historico-header { display: flex; gap: 0.5rem; }
+.btn-limpar { background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.2); color: var(--red); border-radius: 8px; padding: .3rem .8rem; font-size: .75rem; font-weight: 600; cursor: pointer; font-family: inherit; }
+.btn-exportar { background: rgba(79,110,247,.1); border: 1px solid rgba(79,110,247,.2); color: var(--accent); border-radius: 8px; padding: .3rem .8rem; font-size: .75rem; font-weight: 600; cursor: pointer; font-family: inherit; }
+.venda-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: .75rem 0; border-bottom: 1px solid var(--border);
+}
+.venda-item:last-child { border-bottom: none; }
+.venda-meta { font-size: .8rem; color: var(--muted); }
+.venda-nome { font-weight: 600; font-size: .9rem; }
+.venda-right { text-align: right; }
+.venda-valor { font-weight: 700; font-size: .95rem; color: var(--green); }
+.venda-data { font-size: .75rem; color: var(--muted); margin-top: .1rem; }
+.venda-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1rem; margin-left: .5rem; transition: color .2s; }
+.venda-del:hover { color: var(--red); }
+.empty-state { text-align: center; padding: 2rem; color: var(--muted); font-size: .9rem; }
+
+/* CONFIG */
+.config-section { display: flex; flex-direction: column; gap: 1rem; }
+.config-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; }
+.config-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 1rem; }
+.config-row { display: flex; justify-content: space-between; align-items: center; padding: .75rem 0; border-bottom: 1px solid var(--border); }
+.config-row:last-child { border-bottom: none; }
+.config-label { font-size: .9rem; font-weight: 500; }
+.config-sub { font-size: .75rem; color: var(--muted); margin-top: .15rem; }
+.config-input {
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text); font-family: inherit;
+  font-size: .9rem; padding: .5rem .8rem; outline: none; width: 140px;
+  text-align: right; transition: border-color .2s;
+}
+.config-input:focus { border-color: var(--accent); }
+.btn-salvar-config {
+  background: var(--accent); color: white; border: none; border-radius: 10px;
+  padding: .7rem 2rem; font-family: inherit; font-weight: 700; font-size: .9rem;
+  cursor: pointer; margin-top: .5rem; transition: opacity .2s;
+}
+.btn-salvar-config:hover { opacity: .85; }
+
+.config-input-url {
+  width: 100%; padding: .6rem .9rem;
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text); font-family: inherit;
+  font-size: .9rem; outline: none;
+}
+.config-input-url:focus { border-color: var(--accent); }
+
+/* RESUMO TOP */
+.resumo-bar {
+  background: linear-gradient(135deg, var(--card) 0%, var(--card2) 100%);
+  border: 1px solid var(--border); border-radius: 16px;
+  padding: 1.2rem 1.5rem; margin-bottom: 1.5rem;
+  display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap;
+}
+.resumo-item { text-align: center; }
+.resumo-label { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; font-weight: 500; }
+.resumo-val { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.5px; margin-top: .1rem; }
+.resumo-sep { width: 1px; height: 40px; background: var(--border); }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 1.5rem; right: 1.5rem;
+  background: var(--green); color: white;
+  padding: .75rem 1.2rem; border-radius: 10px; font-weight: 600; font-size: .85rem;
+  transform: translateY(100px); opacity: 0; transition: all .3s; z-index: 999;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+
+.loading { opacity: 0.6; pointer-events: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">📊 <span>Metas</span></div>
+  <div class="header-info">
+    <div class="month-badge" id="monthBadge">Janeiro</div>
+    <div class="dias-badge" id="diasBadge">20 dias úteis</div>
+    <div class="status-badge" id="statusBadge">
+      <div class="status-dot"></div>
+      <span>Local</span>
+    </div>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="showPage('dashboard', this)">📈 Dashboard</button>
+  <button class="tab" onclick="showPage('vendas', this)">➕ Adicionar Venda</button>
+  <button class="tab" onclick="showPage('historico', this)">📋 Histórico</button>
+  <button class="tab" onclick="showPage('config', this)">⚙️ Configurações</button>
+</div>
+
+<main>
+
+<!-- DASHBOARD -->
+<div id="page-dashboard" class="page active">
+  <div class="resumo-bar">
+    <div class="resumo-item">
+      <div class="resumo-label">Total Vendido</div>
+      <div class="resumo-val" id="res-total">R$ 0</div>
+    </div>
+    <div class="resumo-sep"></div>
+    <div class="resumo-item">
+      <div class="resumo-label">Falta para Atingir</div>
+      <div class="resumo-val" id="res-falta">R$ 0</div>
+    </div>
+    <div class="resumo-sep"></div>
+    <div class="resumo-item">
+      <div class="resumo-label">Média por Dia</div>
+      <div class="resumo-val" id="res-pordia">R$ 0</div>
+    </div>
+    <div class="resumo-sep"></div>
+    <div class="resumo-item">
+      <div class="resumo-label">Metas Batidas</div>
+      <div class="resumo-val" id="res-batidas">0/6</div>
+    </div>
+  </div>
+
+  <div class="cards-grid" id="cardsGrid"></div>
+</div>
+
+<!-- ADICIONAR VENDA -->
+<div id="page-vendas" class="page">
+  <div class="add-section">
+    <h3>➕ Registrar Venda</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Categoria</label>
+        <select id="vendaCat" onchange="updateVendaInput()">
+          <option value="ar">Ar Condicionado</option>
+          <option value="solar">Energia Solar</option>
+          <option value="kit">Kit Manutenção</option>
+          <option value="piscina">Piscina</option>
+          <option value="limpeza">Limpeza Profissional</option>
+          <option value="outro">Outros Serviços</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label id="labelValor">Valor (R$)</label>
+        <input type="number" id="vendaValor" placeholder="0,00" min="0" step="0.01">
+      </div>
+      <div class="form-group">
+        <label>Cliente</label>
+        <input type="text" id="vendaCliente" placeholder="Nome do cliente (opcional)">
+      </div>
+      <div class="form-group">
+        <label>Data</label>
+        <input type="date" id="vendaData">
+      </div>
+    </div>
+    <button class="btn-add" onclick="adicionarVenda()">💾 Registrar Venda</button>
+  </div>
+</div>
+
+<!-- HISTÓRICO -->
+<div id="page-historico" class="page">
+  <div class="filter-section">
+    <div class="filter-group">
+      <label>Filtrar por Data (De)</label>
+      <input type="date" id="filterDataDe">
+    </div>
+    <div class="filter-group">
+      <label>Até</label>
+      <input type="date" id="filterDataAte">
+    </div>
+    <div class="filter-group">
+      <label>Categoria</label>
+      <select id="filterCat">
+        <option value="">Todas</option>
+        <option value="ar">Ar Condicionado</option>
+        <option value="solar">Energia Solar</option>
+        <option value="kit">Kit Manutenção</option>
+        <option value="piscina">Piscina</option>
+        <option value="limpeza">Limpeza Profissional</option>
+        <option value="outro">Outros Serviços</option>
+      </select>
+    </div>
+    <button class="btn-filter" onclick="aplicarFiltro()">🔍 Filtrar</button>
+    <button class="btn-filter" onclick="limparFiltro()" style="background: var(--card2); color: var(--accent); border: 1px solid var(--border);">↺ Limpar</button>
+  </div>
+
+  <div class="historico-section">
+    <h3>
+      📋 Histórico de Vendas
+      <div class="historico-header">
+        <button class="btn-exportar" onclick="exportarCSV()" title="Exportar para CSV">📥 CSV</button>
+        <button class="btn-limpar" onclick="limparMes()">🗑️ Limpar Tudo</button>
+      </div>
+    </h3>
+    <div id="historicoList" class="empty-state">Carregando vendas...</div>
+  </div>
+</div>
+
+<!-- CONFIG -->
+<div id="page-config" class="page">
+  <div class="config-section">
+    <div class="config-card">
+      <h3>🌐 Sincronização com Banco de Dados</h3>
+      <div class="config-row">
+        <div>
+          <div class="config-label">URL do Servidor</div>
+          <div class="config-sub">Digite a URL do seu servidor (ex: http://192.168.1.100:3000)</div>
+        </div>
+      </div>
+      <div style="margin: 1rem 0;">
+        <input type="text" id="serverUrl" class="config-input-url" placeholder="http://seu-ip:3000">
+      </div>
+      <div class="config-row">
+        <div>
+          <div class="config-label">Status de Conexão</div>
+          <div class="config-sub" id="statusSync">Desconectado • Usando dados locais</div>
+        </div>
+      </div>
+      <button class="btn-salvar-config" onclick="testarConexao()">🔗 Testar Conexão</button>
+      <button class="btn-salvar-config" style="background: var(--green); margin-top: 0.5rem;" onclick="salvarUrlServidor()">✓ Salvar URL</button>
+    </div>
+
+    <div class="config-card">
+      <h3>📊 Metas Mensais</h3>
+      <div id="metasConfig"></div>
+      <button class="btn-salvar-config" onclick="salvarMetas()">💾 Salvar Metas</button>
+    </div>
+
+    <div class="config-card">
+      <h3>ℹ️ Informações</h3>
+      <div class="config-row">
+        <div>
+          <div class="config-label">Versão</div>
+          <div class="config-sub">1.2.0</div>
+        </div>
+      </div>
+      <div class="config-row">
+        <div>
+          <div class="config-label">Armazenamento Local</div>
+          <div class="config-sub" id="storageInfo">Calculando...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const CATS = {
+  ar: { nome: 'Ar Condicionado', icon: '❄️', tipo: 'valor' },
+  solar: { nome: 'Energia Solar', icon: '☀️', tipo: 'valor' },
+  kit: { nome: 'Kit Manutenção', icon: '🔧', tipo: 'valor' },
+  piscina: { nome: 'Piscina', icon: '🏊', tipo: 'valor' },
+  limpeza: { nome: 'Limpeza Profissional', icon: '🧹', tipo: 'valor' },
+  outro: { nome: 'Outros Serviços', icon: '⭐', tipo: 'valor' },
+};
+
+const MONTHS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+let state = {
+  metas: { ar: 15000, solar: 8000, kit: 3000, piscina: 5000, limpeza: 2000, outro: 2000 },
+  vendas: [],
+  diasUteis: 20,
+  diasPassados: 10,
+  serverUrl: localStorage.getItem('serverUrl') || '',
+  filtroAplicado: false,
+  filtroVendas: [],
+};
+
+// ── INIT ──
+async function init() {
+  setDefaultDate();
+  renderMetasConfig();
+  atualizarStatusSincronizacao();
+  
+  if (state.serverUrl) {
+    await sincronizarDoServidor();
+  } else {
+    carregarDoLocal();
+  }
+  
+  renderDashboard();
+  renderHistorico();
+  calcularStorage();
+}
+
+function setDefaultDate() {
+  const hoje = new Date();
+  document.getElementById('vendaData').valueAsDate = hoje;
+  
+  const dia = String(hoje.getDate()).padStart(2, '0');
+  const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+  const ano = hoje.getFullYear();
+  document.getElementById('filterDataAte').value = `${ano}-${mes}-${dia}`;
+  
+  const primeira = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+  const diaP = String(primeira.getDate()).padStart(2, '0');
+  const mesP = String(primeira.getMonth() + 1).padStart(2, '0');
+  document.getElementById('filterDataDe').value = `${ano}-${mesP}-${diaP}`;
+}
+
+function carregarDoLocal() {
+  const saved = localStorage.getItem('vendas');
+  if (saved) state.vendas = JSON.parse(saved);
+}
+
+function salvar() {
+  localStorage.setItem('vendas', JSON.stringify(state.vendas));
+  localStorage.setItem('metas', JSON.stringify(state.metas));
+}
+
+// ── SINCRONIZAÇÃO COM SERVIDOR ──
+async function sincronizarDoServidor() {
+  try {
+    const response = await fetch(`${state.serverUrl}/api/vendas`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    
+    const data = await response.json();
+    state.vendas = data.vendas || [];
+    atualizarStatusSincronizacao(true);
+    renderDashboard();
+    renderHistorico();
+    toast('✓ Sincronizado com servidor');
+  } catch (err) {
+    console.error('Erro ao sincronizar:', err);
+    atualizarStatusSincronizacao(false);
+    carregarDoLocal();
+  }
+}
+
+async function salvarNoServidor(venda) {
+  if (!state.serverUrl) {
+    salvar();
+    return true;
+  }
+  
+  try {
+    const response = await fetch(`${state.serverUrl}/api/vendas`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(venda)
+    });
+    
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    await sincronizarDoServidor();
+    return true;
+  } catch (err) {
+    console.error('Erro ao salvar no servidor:', err);
+    salvar();
+    toast('⚠️ Salvo localmente (servidor indisponível)', 'warning');
+    return false;
+  }
+}
+
+async function deletarNoServidor(id) {
+  if (!state.serverUrl) {
+    salvar();
+    return true;
+  }
+  
+  try {
+    const response = await fetch(`${state.serverUrl}/api/vendas/${id}`, {
+      method: 'DELETE'
+    });
+    
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    await sincronizarDoServidor();
+    return true;
+  } catch (err) {
+    console.error('Erro ao deletar no servidor:', err);
+    salvar();
+    toast('⚠️ Deletado localmente', 'warning');
+    return false;
+  }
+}
+
+async function testarConexao() {
+  const url = document.getElementById('serverUrl').value.trim();
+  if (!url) {
+    toast('Digite uma URL válida', 'error');
+    return;
+  }
+  
+  try {
+    const response = await fetch(`${url}/api/health`, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' }
+    });
+    
+    if (response.ok) {
+      toast('✓ Conexão bem-sucedida!', 'success');
+      state.serverUrl = url;
+      localStorage.setItem('serverUrl', url);
+      atualizarStatusSincronizacao(true);
+    } else {
+      toast('✗ Servidor não respondeu corretamente', 'error');
+    }
+  } catch (err) {
+    toast('✗ Não foi possível conectar ao servidor', 'error');
+    atualizarStatusSincronizacao(false);
+  }
+}
+
+function salvarUrlServidor() {
+  const url = document.getElementById('serverUrl').value.trim();
+  if (url) {
+    state.serverUrl = url;
+    localStorage.setItem('serverUrl', url);
+    toast('URL salva com sucesso!');
+  }
+}
+
+function atualizarStatusSincronizacao(conectado = null) {
+  const badge = document.getElementById('statusBadge');
+  const statusText = document.getElementById('statusSync');
+  
+  if (conectado === null) conectado = state.serverUrl ? false : null;
+  
+  if (conectado === true) {
+    badge.className = 'status-badge status-online';
+    badge.innerHTML = '<div class="status-dot"></div><span>Sincronizado</span>';
+    statusText.textContent = `✓ Conectado a ${state.serverUrl}`;
+  } else if (conectado === false) {
+    badge.className = 'status-badge status-offline';
+    badge.innerHTML = '<div class="status-dot"></div><span>Desconectado</span>';
+    statusText.textContent = 'Usando dados locais (offline)';
+  } else {
+    badge.className = 'status-badge status-offline';
+    badge.innerHTML = '<div class="status-dot"></div><span>Local</span>';
+    statusText.textContent = 'Usando dados locais (sem servidor configurado)';
+  }
+}
+
+function calcularStorage() {
+  const totalSize = JSON.stringify(state.vendas).length + JSON.stringify(state.metas).length;
+  const totalMB = (totalSize / (1024 * 1024)).toFixed(2);
+  document.getElementById('storageInfo').textContent = `${totalSize} bytes (${totalMB} MB)`;
+}
+
+// ── RENDER METAS CONFIG ──
+function renderMetasConfig() {
+  const html = Object.entries(CATS).map(([key, cat]) => `
+    <div class="config-row">
+      <div>
+        <div class="config-label">${cat.icon} ${cat.nome}</div>
+        <div class="config-sub">Meta mensal</div>
+      </div>
+      <input type="number" id="meta-${key}" class="config-input" 
+             value="${state.metas[key] || 0}" min="0" step="100">
+    </div>
+  `).join('');
+  
+  document.getElementById('metasConfig').innerHTML = html;
+}
+
+function salvarMetas() {
+  Object.keys(state.metas).forEach(k => {
+    const el = document.getElementById('meta-' + k);
+    if (el) state.metas[k] = parseFloat(el.value) || 0;
+  });
+  salvar();
+  renderDashboard();
+  toast('Metas salvas com sucesso!');
+}
+
+// ── VENDAS ──
+function updateVendaInput() {
+  const cat = document.getElementById('vendaCat').value;
+  const labelEl = document.getElementById('labelValor');
+  if (cat === 'ar') {
+    labelEl.textContent = 'Quantidade de instalações';
+    document.getElementById('vendaValor').placeholder = '1';
+    document.getElementById('vendaValor').step = '1';
+  } else {
+    labelEl.textContent = 'Valor (R$)';
+    document.getElementById('vendaValor').placeholder = '0,00';
+    document.getElementById('vendaValor').step = '0.01';
+  }
+}
+
+async function adicionarVenda() {
+  const cat = document.getElementById('vendaCat').value;
+  const cliente = document.getElementById('vendaCliente').value.trim();
+  const valor = parseFloat(document.getElementById('vendaValor').value);
+  const data = document.getElementById('vendaData').value;
+
+  if (!valor || valor <= 0) { toast('Informe um valor válido!', 'error'); return; }
+  if (!data) { toast('Informe a data!', 'error'); return; }
+
+  const venda = { id: Date.now(), cat, cliente, valor, data };
+  state.vendas.push(venda);
+  
+  await salvarNoServidor(venda);
+
+  // Reset form
+  document.getElementById('vendaValor').value = '';
+  document.getElementById('vendaCliente').value = '';
+
+  renderDashboard();
+  renderHistorico();
+  toast(`${CATS[cat].icon} Venda registrada!`);
+  showPage('dashboard', document.querySelector('.tab'));
+}
+
+// ── TOTAL POR CATEGORIA ──
+function totalCat(cat, vendas = null) {
+  const lista = vendas || (state.filtroAplicado ? state.filtroVendas : state.vendas);
+  return lista.filter(v => v.cat === cat).reduce((s, v) => s + v.valor, 0);
+}
+
+// ── FILTRO DE VENDAS ──
+function aplicarFiltro() {
+  const dataDe = document.getElementById('filterDataDe').value;
+  const dataAte = document.getElementById('filterDataAte').value;
+  const categoria = document.getElementById('filterCat').value;
+
+  if (!dataDe || !dataAte) {
+    toast('Informe as duas datas!', 'error');
+    return;
+  }
+
+  state.filtroVendas = state.vendas.filter(v => {
+    const dataVenda = new Date(v.data);
+    const de = new Date(dataDe);
+    const ate = new Date(dataAte);
+    
+    const dataOk = dataVenda >= de && dataVenda <= ate;
+    const catOk = !categoria || v.cat === categoria;
+    
+    return dataOk && catOk;
+  });
+
+  state.filtroAplicado = true;
+  renderHistorico();
+  toast(`${state.filtroVendas.length} vendas encontradas`);
+}
+
+function limparFiltro() {
+  state.filtroAplicado = false;
+  state.filtroVendas = [];
+  document.getElementById('filterCat').value = '';
+  renderHistorico();
+  toast('Filtro limpo');
+}
+
+function exportarCSV() {
+  const vendas = state.filtroAplicado ? state.filtroVendas : state.vendas;
+  if (!vendas.length) {
+    toast('Nenhuma venda para exportar!', 'error');
+    return;
+  }
+
+  let csv = 'Data,Categoria,Cliente,Valor\n';
+  vendas.forEach(v => {
+    const data = new Date(v.data + 'T12:00:00').toLocaleDateString('pt-BR');
+    csv += `${data},${CATS[v.cat].nome},"${v.cliente || '-'}",${v.valor}\n`;
+  });
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `vendas_${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  toast('CSV exportado!');
+}
+
+// ── RENDER DASHBOARD ──
+function renderDashboard() {
+  const restantes = Math.max(1, state.diasUteis - state.diasPassados);
+  let totalVendido = 0;
+  let totalMeta = 0;
+  let totalFalta = 0;
+  let batidas = 0;
+
+  const vendas = state.filtroAplicado ? state.filtroVendas : state.vendas;
+
+  let html = '';
+  Object.entries(CATS).forEach(([key, cat]) => {
+    const meta = state.metas[key] || 0;
+    const atual = vendas.filter(v => v.cat === key).reduce((s, v) => s + v.valor, 0);
+    const pct = meta > 0 ? Math.min(100, (atual / meta) * 100) : 0;
+    const falta = Math.max(0, meta - atual);
+    const porDia = restantes > 0 ? falta / restantes : 0;
+
+    totalVendido += atual;
+    totalMeta += meta;
+    totalFalta += falta;
+    
+    if (atual >= meta && meta > 0) batidas++;
+
+    let fillClass = pct >= 100 ? 'fill-green' : pct >= 60 ? 'fill-yellow' : 'fill-red';
+    let badgeClass = pct >= 100 ? 'badge-ok' : pct >= 60 ? 'badge-atencao' : 'badge-critico';
+    let badgeText = pct >= 100 ? '✓ Batida' : pct >= 60 ? 'No caminho' : 'Atenção';
+    let statColor = pct >= 100 ? 'green' : pct >= 60 ? 'yellow' : 'red';
+
+    const formatVal = (v) => `R$ ${v.toLocaleString('pt-BR', {minimumFractionDigits:0, maximumFractionDigits:0})}`;
+
+    html += `
+      <div class="meta-card">
+        <div class="meta-header">
+          <div class="meta-icon">${cat.icon}</div>
+          <div class="meta-badge ${badgeClass}">${badgeText}</div>
+        </div>
+        <div class="meta-name">${cat.nome}</div>
+        <div class="meta-atual">${formatVal(atual)}</div>
+        <div class="meta-total">de ${formatVal(meta)}</div>
+        <div class="progress-bar"><div class="progress-fill ${fillClass}" style="width:${pct}%"></div></div>
+        <div class="meta-stats">
+          <div class="stat-box">
+            <div class="stat-label">Falta</div>
+            <div class="stat-value ${statColor}">${formatVal(falta)}</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Por dia</div>
+            <div class="stat-value ${statColor}">${formatVal(porDia)}</div>
+          </div>
+        </div>
+      </div>`;
+  });
+
+  document.getElementById('cardsGrid').innerHTML = html;
+
+  // Resumo
+  const fmt = v => `R$ ${v.toLocaleString('pt-BR', {minimumFractionDigits:0, maximumFractionDigits:0})}`;
+  const porDiaGeral = restantes > 0 ? totalFalta / restantes : 0;
+  document.getElementById('res-total').textContent = fmt(totalVendido);
+  document.getElementById('res-falta').textContent = fmt(totalFalta);
+  document.getElementById('res-pordia').textContent = fmt(porDiaGeral);
+  document.getElementById('res-batidas').textContent = `${batidas}/6`;
+}
+
+// ── RENDER HISTÓRICO ──
+function renderHistorico() {
+  const list = document.getElementById('historicoList');
+  const vendas = state.filtroAplicado ? state.filtroVendas : state.vendas;
+  
+  if (!vendas.length) {
+    list.innerHTML = '<div class="empty-state">Nenhuma venda registrada.</div>';
+    return;
+  }
+  
+  const sorted = [...vendas].sort((a,b) => b.id - a.id);
+  list.innerHTML = sorted.map(v => {
+    const cat = CATS[v.cat];
+    const val = `R$ ${parseFloat(v.valor).toLocaleString('pt-BR', {minimumFractionDigits:0})}`;
+    const data = new Date(v.data + 'T12:00:00').toLocaleDateString('pt-BR');
+    return `
+      <div class="venda-item">
+        <div>
+          <div class="venda-meta">${cat.icon} ${cat.nome}</div>
+          <div class="venda-nome">${v.cliente || 'Cliente não informado'}</div>
+        </div>
+        <div class="venda-right" style="display:flex;align-items:center;gap:.5rem">
+          <div>
+            <div class="venda-valor">${val}</div>
+            <div class="venda-data">${data}</div>
+          </div>
+          <button class="venda-del" onclick="deletarVenda(${v.id})" title="Remover">✕</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+async function deletarVenda(id) {
+  if (!confirm('Remover esta venda?')) return;
+  state.vendas = state.vendas.filter(v => v.id !== id);
+  if (state.filtroAplicado) {
+    state.filtroVendas = state.filtroVendas.filter(v => v.id !== id);
+  }
+  
+  await deletarNoServidor(id);
+  renderDashboard();
+  renderHistorico();
+  toast('Venda removida.');
+}
+
+async function limparMes() {
+  if (!confirm('Limpar TODAS as vendas deste mês? Esta ação não pode ser desfeita.')) return;
+  state.vendas = [];
+  state.filtroVendas = [];
+  state.filtroAplicado = false;
+  
+  salvar();
+  renderDashboard();
+  renderHistorico();
+  toast('Histórico limpo.');
+}
+
+// ── NAV ──
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t => {
+    if (t.getAttribute('onclick') && t.getAttribute('onclick').includes("'"+id+"'")) t.classList.add('active');
+  });
+}
+
+// ── TOAST ──
+function toast(msg, type = 'success') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.background = type === 'error' ? 'var(--red)' : type === 'warning' ? 'var(--yellow)' : 'var(--green)';
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+init();
+</script>
+</body>
+</html>
