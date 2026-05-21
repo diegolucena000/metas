@@ -42,19 +42,6 @@ header {
   background: rgba(79,110,247,.15); border: 1px solid rgba(79,110,247,.3);
   padding: .35rem .8rem; border-radius: 20px; font-size: .8rem; color: var(--accent); font-weight: 600;
 }
-.status-badge {
-  display: inline-flex; align-items: center; gap: 0.5rem; 
-  padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
-}
-.status-online {
-  background: rgba(34,197,94,.15); color: var(--green); border: 1px solid rgba(34,197,94,.3);
-}
-.status-offline {
-  background: rgba(239,68,68,.15); color: var(--red); border: 1px solid rgba(239,68,68,.3);
-}
-.status-dot {
-  width: 6px; height: 6px; border-radius: 50%; background: currentColor;
-}
 
 /* TABS */
 .tabs {
@@ -141,32 +128,10 @@ main { padding: 1.5rem; max-width: 900px; margin: 0 auto; }
 .btn-add:active { transform: scale(.98); }
 .btn-add:disabled { opacity: .5; cursor: not-allowed; }
 
-/* FILTRO DE VENDAS */
-.filter-section {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 16px; padding: 1rem 1.5rem; margin-bottom: 1.5rem;
-  display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;
-}
-.filter-group { display: flex; flex-direction: column; gap: .4rem; flex: 1; min-width: 150px; }
-.filter-group label { font-size: .75rem; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: .06em; }
-.filter-group input, .filter-group select {
-  background: var(--card2); border: 1px solid var(--border);
-  border-radius: 8px; color: var(--text); font-family: inherit;
-  font-size: .9rem; padding: .6rem .9rem; outline: none;
-}
-.btn-filter {
-  background: var(--accent); color: white; border: none; border-radius: 10px;
-  padding: .6rem 1.2rem; font-weight: 600; font-size: .9rem;
-  cursor: pointer; transition: opacity .2s;
-}
-.btn-filter:hover { opacity: .9; }
-
 /* HISTORICO */
 .historico-section { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; }
 .historico-section h3 { font-size: 1rem; font-weight: 700; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; }
-.historico-header { display: flex; gap: 0.5rem; }
 .btn-limpar { background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.2); color: var(--red); border-radius: 8px; padding: .3rem .8rem; font-size: .75rem; font-weight: 600; cursor: pointer; font-family: inherit; }
-.btn-exportar { background: rgba(79,110,247,.1); border: 1px solid rgba(79,110,247,.2); color: var(--accent); border-radius: 8px; padding: .3rem .8rem; font-size: .75rem; font-weight: 600; cursor: pointer; font-family: inherit; }
 .venda-item {
   display: flex; justify-content: space-between; align-items: center;
   padding: .75rem 0; border-bottom: 1px solid var(--border);
@@ -203,14 +168,6 @@ main { padding: 1.5rem; max-width: 900px; margin: 0 auto; }
 }
 .btn-salvar-config:hover { opacity: .85; }
 
-.config-input-url {
-  width: 100%; padding: .6rem .9rem;
-  background: var(--card2); border: 1px solid var(--border);
-  border-radius: 8px; color: var(--text); font-family: inherit;
-  font-size: .9rem; outline: none;
-}
-.config-input-url:focus { border-color: var(--accent); }
-
 /* RESUMO TOP */
 .resumo-bar {
   background: linear-gradient(135deg, var(--card) 0%, var(--card2) 100%);
@@ -231,396 +188,308 @@ main { padding: 1.5rem; max-width: 900px; margin: 0 auto; }
   transform: translateY(100px); opacity: 0; transition: all .3s; z-index: 999;
 }
 .toast.show { transform: translateY(0); opacity: 1; }
-
-.loading { opacity: 0.6; pointer-events: none; }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="logo">📊 <span>Metas</span></div>
+  <div class="logo">Ramsons <span>Metas</span></div>
   <div class="header-info">
-    <div class="month-badge" id="monthBadge">Janeiro</div>
-    <div class="dias-badge" id="diasBadge">20 dias úteis</div>
-    <div class="status-badge" id="statusBadge">
-      <div class="status-dot"></div>
-      <span>Local</span>
-    </div>
+    <select id="monthSelector" onchange="mudarMes(this.value)" style="
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 0.5rem 0.8rem;
+      font-family: inherit;
+      font-weight: 500;
+      cursor: pointer;
+      outline: none;
+      font-size: 0.9rem;
+    ">
+      <option value="">Seleção de mês...</option>
+    </select>
+    <div class="dias-badge" id="diasBadge">— dias úteis restantes</div>
   </div>
 </header>
 
 <div class="tabs">
-  <button class="tab active" onclick="showPage('dashboard', this)">📈 Dashboard</button>
-  <button class="tab" onclick="showPage('vendas', this)">➕ Adicionar Venda</button>
+  <button class="tab active" onclick="showPage('dashboard', this)">📊 Dashboard</button>
+  <button class="tab" onclick="showPage('lancar', this)">➕ Lançar Venda</button>
   <button class="tab" onclick="showPage('historico', this)">📋 Histórico</button>
-  <button class="tab" onclick="showPage('config', this)">⚙️ Configurações</button>
+  <button class="tab" onclick="showPage('config', this)">⚙️ Metas</button>
 </div>
 
 <main>
 
-<!-- DASHBOARD -->
-<div id="page-dashboard" class="page active">
-  <div class="resumo-bar">
-    <div class="resumo-item">
-      <div class="resumo-label">Total Vendido</div>
-      <div class="resumo-val" id="res-total">R$ 0</div>
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="resumo-bar" id="resumoBar">
+      <div class="resumo-item"><div class="resumo-label">Vendido no mês</div><div class="resumo-val" id="res-total">R$ 0</div></div>
+      <div class="resumo-sep"></div>
+      <div class="resumo-item"><div class="resumo-label">Falta para metas</div><div class="resumo-val" style="color:var(--yellow)" id="res-falta">—</div></div>
+      <div class="resumo-sep"></div>
+      <div class="resumo-item"><div class="resumo-label">Necessário/dia</div><div class="resumo-val" style="color:var(--accent)" id="res-pordia">—</div></div>
+      <div class="resumo-sep"></div>
+      <div class="resumo-item"><div class="resumo-label">Metas batidas</div><div class="resumo-val" style="color:var(--green)" id="res-batidas">0/6</div></div>
     </div>
-    <div class="resumo-sep"></div>
-    <div class="resumo-item">
-      <div class="resumo-label">Falta para Atingir</div>
-      <div class="resumo-val" id="res-falta">R$ 0</div>
-    </div>
-    <div class="resumo-sep"></div>
-    <div class="resumo-item">
-      <div class="resumo-label">Média por Dia</div>
-      <div class="resumo-val" id="res-pordia">R$ 0</div>
-    </div>
-    <div class="resumo-sep"></div>
-    <div class="resumo-item">
-      <div class="resumo-label">Metas Batidas</div>
-      <div class="resumo-val" id="res-batidas">0/6</div>
-    </div>
+    <div class="cards-grid" id="cardsGrid"></div>
   </div>
 
-  <div class="cards-grid" id="cardsGrid"></div>
-</div>
-
-<!-- ADICIONAR VENDA -->
-<div id="page-vendas" class="page">
-  <div class="add-section">
-    <h3>➕ Registrar Venda</h3>
-    <div class="form-grid">
-      <div class="form-group">
-        <label>Categoria</label>
-        <select id="vendaCat" onchange="updateVendaInput()">
-          <option value="ar">Ar Condicionado</option>
-          <option value="solar">Energia Solar</option>
-          <option value="kit">Kit Manutenção</option>
-          <option value="piscina">Piscina</option>
-          <option value="limpeza">Limpeza Profissional</option>
-          <option value="outro">Outros Serviços</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label id="labelValor">Valor (R$)</label>
-        <input type="number" id="vendaValor" placeholder="0,00" min="0" step="0.01">
-      </div>
-      <div class="form-group">
-        <label>Cliente</label>
-        <input type="text" id="vendaCliente" placeholder="Nome do cliente (opcional)">
-      </div>
-      <div class="form-group">
-        <label>Data</label>
-        <input type="date" id="vendaData">
-      </div>
-    </div>
-    <button class="btn-add" onclick="adicionarVenda()">💾 Registrar Venda</button>
-  </div>
-</div>
-
-<!-- HISTÓRICO -->
-<div id="page-historico" class="page">
-  <div class="filter-section">
-    <div class="filter-group">
-      <label>Filtrar por Data (De)</label>
-      <input type="date" id="filterDataDe">
-    </div>
-    <div class="filter-group">
-      <label>Até</label>
-      <input type="date" id="filterDataAte">
-    </div>
-    <div class="filter-group">
-      <label>Categoria</label>
-      <select id="filterCat">
-        <option value="">Todas</option>
-        <option value="ar">Ar Condicionado</option>
-        <option value="solar">Energia Solar</option>
-        <option value="kit">Kit Manutenção</option>
-        <option value="piscina">Piscina</option>
-        <option value="limpeza">Limpeza Profissional</option>
-        <option value="outro">Outros Serviços</option>
-      </select>
-    </div>
-    <button class="btn-filter" onclick="aplicarFiltro()">🔍 Filtrar</button>
-    <button class="btn-filter" onclick="limparFiltro()" style="background: var(--card2); color: var(--accent); border: 1px solid var(--border);">↺ Limpar</button>
-  </div>
-
-  <div class="historico-section">
-    <h3>
-      📋 Histórico de Vendas
-      <div class="historico-header">
-        <button class="btn-exportar" onclick="exportarCSV()" title="Exportar para CSV">📥 CSV</button>
-        <button class="btn-limpar" onclick="limparMes()">🗑️ Limpar Tudo</button>
-      </div>
-    </h3>
-    <div id="historicoList" class="empty-state">Carregando vendas...</div>
-  </div>
-</div>
-
-<!-- CONFIG -->
-<div id="page-config" class="page">
-  <div class="config-section">
-    <div class="config-card">
-      <h3>🌐 Sincronização com Banco de Dados</h3>
-      <div class="config-row">
-        <div>
-          <div class="config-label">URL do Servidor</div>
-          <div class="config-sub">Digite a URL do seu servidor (ex: http://192.168.1.100:3000)</div>
+  <!-- LANÇAR -->
+  <div class="page" id="page-lancar">
+    <div class="add-section">
+      <h3>➕ Registrar nova venda</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Categoria</label>
+          <select id="vendaCat" onchange="updateVendaInput()">
+            <option value="produtos">🛍️ Produtos Vendidos</option>
+            <option value="garantia">🛡️ Garantia Estendida</option>
+            <option value="seguro">🔒 Seguro</option>
+            <option value="psd">💻 PSD (Informática)</option>
+            <option value="crediario">💳 Crediário UME</option>
+            <option value="ar">❄️ Instalação de Ar-cond.</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Cliente (opcional)</label>
+          <input type="text" id="vendaCliente" placeholder="Nome do cliente...">
+        </div>
+        <div class="form-group" id="grupoValor">
+          <label id="labelValor">Valor (R$)</label>
+          <input type="number" id="vendaValor" placeholder="0,00" min="0" step="0.01">
+        </div>
+        <div class="form-group">
+          <label>Data</label>
+          <input type="date" id="vendaData">
         </div>
       </div>
-      <div style="margin: 1rem 0;">
-        <input type="text" id="serverUrl" class="config-input-url" placeholder="http://seu-ip:3000">
-      </div>
-      <div class="config-row">
-        <div>
-          <div class="config-label">Status de Conexão</div>
-          <div class="config-sub" id="statusSync">Desconectado • Usando dados locais</div>
-        </div>
-      </div>
-      <button class="btn-salvar-config" onclick="testarConexao()">🔗 Testar Conexão</button>
-      <button class="btn-salvar-config" style="background: var(--green); margin-top: 0.5rem;" onclick="salvarUrlServidor()">✓ Salvar URL</button>
+      <button class="btn-add" onclick="adicionarVenda()">Registrar venda</button>
     </div>
+  </div>
 
-    <div class="config-card">
-      <h3>📊 Metas Mensais</h3>
-      <div id="metasConfig"></div>
-      <button class="btn-salvar-config" onclick="salvarMetas()">💾 Salvar Metas</button>
+  <!-- HISTÓRICO -->
+  <div class="page" id="page-historico">
+    <div class="historico-section">
+      <h3>
+        Histórico do mês
+        <button class="btn-limpar" onclick="limparMes()">🗑 Limpar mês</button>
+      </h3>
+      <div id="historicoList"><div class="empty-state">Nenhuma venda registrada ainda.</div></div>
     </div>
+  </div>
 
-    <div class="config-card">
-      <h3>ℹ️ Informações</h3>
-      <div class="config-row">
-        <div>
-          <div class="config-label">Versão</div>
-          <div class="config-sub">1.2.0</div>
+  <!-- CONFIG -->
+  <div class="page" id="page-config">
+    <div class="config-section">
+      <div class="config-card">
+        <h3>🎯 Definir metas mensais</h3>
+        <div class="config-row">
+          <div><div class="config-label">🛍️ Produtos Vendidos</div><div class="config-sub">Meta em R$</div></div>
+          <input type="number" class="config-input" id="meta-produtos" placeholder="0">
         </div>
+        <div class="config-row">
+          <div><div class="config-label">🛡️ Garantia Estendida</div><div class="config-sub">Meta em R$</div></div>
+          <input type="number" class="config-input" id="meta-garantia" placeholder="0">
+        </div>
+        <div class="config-row">
+          <div><div class="config-label">🔒 Seguro</div><div class="config-sub">Meta em R$</div></div>
+          <input type="number" class="config-input" id="meta-seguro" placeholder="0">
+        </div>
+        <div class="config-row">
+          <div><div class="config-label">💻 PSD (Informática)</div><div class="config-sub">Meta em R$</div></div>
+          <input type="number" class="config-input" id="meta-psd" placeholder="0">
+        </div>
+        <div class="config-row">
+          <div><div class="config-label">💳 Crediário UME</div><div class="config-sub">Meta em R$</div></div>
+          <input type="number" class="config-input" id="meta-crediario" placeholder="0">
+        </div>
+        <div class="config-row">
+          <div><div class="config-label">❄️ Instalação de Ar-cond.</div><div class="config-sub">Meta em <strong>quantidade</strong></div></div>
+          <input type="number" class="config-input" id="meta-ar" placeholder="0">
+        </div>
+        <button class="btn-salvar-config" onclick="salvarMetas()">💾 Salvar metas</button>
       </div>
-      <div class="config-row">
-        <div>
-          <div class="config-label">Armazenamento Local</div>
-          <div class="config-sub" id="storageInfo">Calculando...</div>
+      <div class="config-card">
+        <h3>📅 Dias úteis no mês</h3>
+        <div class="config-row">
+          <div><div class="config-label">Total de dias úteis</div><div class="config-sub">Quantos dias você trabalha este mês</div></div>
+          <input type="number" class="config-input" id="diasUteis" placeholder="22" min="1" max="31">
         </div>
+        <div class="config-row">
+          <div><div class="config-label">Dias úteis já passados</div><div class="config-sub">Quantos dias úteis já se passaram</div></div>
+          <input type="number" class="config-input" id="diasPassados" placeholder="0" min="0" max="31">
+        </div>
+        <button class="btn-salvar-config" onclick="salvarDias()">💾 Salvar dias</button>
       </div>
     </div>
   </div>
-</div>
 
 </main>
 
 <div class="toast" id="toast"></div>
 
 <script>
-const CATS = {
-  ar: { nome: 'Ar Condicionado', icon: '❄️', tipo: 'valor' },
-  solar: { nome: 'Energia Solar', icon: '☀️', tipo: 'valor' },
-  kit: { nome: 'Kit Manutenção', icon: '🔧', tipo: 'valor' },
-  piscina: { nome: 'Piscina', icon: '🏊', tipo: 'valor' },
-  limpeza: { nome: 'Limpeza Profissional', icon: '🧹', tipo: 'valor' },
-  outro: { nome: 'Outros Serviços', icon: '⭐', tipo: 'valor' },
-};
+// ── STORAGE KEY ──
+const KEY = 'ramsons_metas_v3';
 
-const MONTHS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-
+// ── STATE ──
 let state = {
-  metas: { ar: 15000, solar: 8000, kit: 3000, piscina: 5000, limpeza: 2000, outro: 2000 },
-  vendas: [],
-  diasUteis: 20,
-  diasPassados: 10,
-  serverUrl: localStorage.getItem('serverUrl') || '',
-  filtroAplicado: false,
-  filtroVendas: [],
+  meses: {}, // { 'YYYY-MM': { metas, vendas, diasUteis, diasPassados } }
+  mesAtual: ''
 };
+
+const CATS = {
+  produtos:  { nome: 'Produtos Vendidos',     icon: '🛍️', unidade: 'R$', tipo: 'valor' },
+  garantia:  { nome: 'Garantia Estendida',    icon: '🛡️', unidade: 'R$', tipo: 'valor' },
+  seguro:    { nome: 'Seguro',                icon: '🔒', unidade: 'R$', tipo: 'valor' },
+  psd:       { nome: 'PSD (Informática)',      icon: '💻', unidade: 'R$', tipo: 'valor' },
+  crediario: { nome: 'Crediário UME',         icon: '💳', unidade: 'R$', tipo: 'valor' },
+  ar:        { nome: 'Instalação Ar-cond.',   icon: '❄️', unidade: 'un', tipo: 'qtd'   },
+};
+
+// ── ESTRUTURA MÊS ──
+function criarMes(key) {
+  return {
+    metas: { produtos: 0, garantia: 0, seguro: 0, psd: 0, crediario: 0, ar: 0 },
+    vendas: [],
+    diasUteis: 22,
+    diasPassados: 0
+  };
+}
+
+function getMesAtual() {
+  if (!state.meses[state.mesAtual]) {
+    state.meses[state.mesAtual] = criarMes(state.mesAtual);
+  }
+  return state.meses[state.mesAtual];
+}
 
 // ── INIT ──
-async function init() {
-  setDefaultDate();
-  renderMetasConfig();
-  atualizarStatusSincronizacao();
+function init() {
+  const saved = localStorage.getItem(KEY);
+  if (saved) {
+    try { state = JSON.parse(saved); } catch(e) {}
+  }
+
+  // Data de hoje
+  const hoje = new Date();
+  const mesKey = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`;
+  state.mesAtual = mesKey;
+
+  // Garantir que o mês atual existe
+  if (!state.meses[state.mesAtual]) {
+    state.meses[state.mesAtual] = criarMes(state.mesAtual);
+  }
+
+  // Set date default
+  document.getElementById('vendaData').value = hoje.toISOString().split('T')[0];
+
+  // Preencher selector de meses
+  preencherSelectorMeses();
+
+  // Load config inputs do mês atual
+  carregarConfigDoMes();
+
+  atualizarDiasBadge();
+  renderDashboard();
+  renderHistorico();
+}
+
+function preencherSelectorMeses() {
+  const selector = document.getElementById('monthSelector');
+  const meses = Object.keys(state.meses).sort().reverse(); // Mais recentes primeiro
   
-  if (state.serverUrl) {
-    await sincronizarDoServidor();
-  } else {
-    carregarDoLocal();
+  selector.innerHTML = '<option value="">— Selecione um mês —</option>';
+  meses.forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m;
+    const [ano, mes] = m.split('-');
+    const nomeMes = new Date(ano, parseInt(mes) - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    opt.textContent = nomeMes.charAt(0).toUpperCase() + nomeMes.slice(1);
+    selector.appendChild(opt);
+  });
+  
+  // Criar novo mês
+  const optNovo = document.createElement('option');
+  optNovo.value = '__novo__';
+  optNovo.textContent = '➕ Novo mês';
+  selector.appendChild(optNovo);
+}
+
+function mudarMes(mesKey) {
+  if (mesKey === '__novo__') {
+    // Abrir dialog ou modal para criar novo mês
+    const novoMes = prompt('Digite o mês (YYYY-MM)\nExemplo: 2024-12');
+    if (!novoMes) {
+      preencherSelectorMeses();
+      return;
+    }
+    if (!/^\d{4}-\d{2}$/.test(novoMes)) {
+      alert('Formato inválido! Use YYYY-MM');
+      preencherSelectorMeses();
+      return;
+    }
+    if (state.meses[novoMes]) {
+      alert('Este mês já existe!');
+      preencherSelectorMeses();
+      return;
+    }
+    state.meses[novoMes] = criarMes(novoMes);
+    state.mesAtual = novoMes;
+    salvar();
+    preencherSelectorMeses();
+    document.getElementById('monthSelector').value = novoMes;
+    toast(`Mês ${novoMes} criado!`);
+  } else if (mesKey) {
+    state.mesAtual = mesKey;
+    salvar();
+    carregarConfigDoMes();
   }
   
   renderDashboard();
   renderHistorico();
-  calcularStorage();
+  atualizarDiasBadge();
 }
 
-function setDefaultDate() {
-  const hoje = new Date();
-  document.getElementById('vendaData').valueAsDate = hoje;
-  
-  const dia = String(hoje.getDate()).padStart(2, '0');
-  const mes = String(hoje.getMonth() + 1).padStart(2, '0');
-  const ano = hoje.getFullYear();
-  document.getElementById('filterDataAte').value = `${ano}-${mes}-${dia}`;
-  
-  const primeira = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-  const diaP = String(primeira.getDate()).padStart(2, '0');
-  const mesP = String(primeira.getMonth() + 1).padStart(2, '0');
-  document.getElementById('filterDataDe').value = `${ano}-${mesP}-${diaP}`;
-}
-
-function carregarDoLocal() {
-  const saved = localStorage.getItem('vendas');
-  if (saved) state.vendas = JSON.parse(saved);
-}
-
-function salvar() {
-  localStorage.setItem('vendas', JSON.stringify(state.vendas));
-  localStorage.setItem('metas', JSON.stringify(state.metas));
-}
-
-// ── SINCRONIZAÇÃO COM SERVIDOR ──
-async function sincronizarDoServidor() {
-  try {
-    const response = await fetch(`${state.serverUrl}/api/vendas`);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    
-    const data = await response.json();
-    state.vendas = data.vendas || [];
-    atualizarStatusSincronizacao(true);
-    renderDashboard();
-    renderHistorico();
-    toast('✓ Sincronizado com servidor');
-  } catch (err) {
-    console.error('Erro ao sincronizar:', err);
-    atualizarStatusSincronizacao(false);
-    carregarDoLocal();
-  }
-}
-
-async function salvarNoServidor(venda) {
-  if (!state.serverUrl) {
-    salvar();
-    return true;
-  }
-  
-  try {
-    const response = await fetch(`${state.serverUrl}/api/vendas`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(venda)
-    });
-    
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    await sincronizarDoServidor();
-    return true;
-  } catch (err) {
-    console.error('Erro ao salvar no servidor:', err);
-    salvar();
-    toast('⚠️ Salvo localmente (servidor indisponível)', 'warning');
-    return false;
-  }
-}
-
-async function deletarNoServidor(id) {
-  if (!state.serverUrl) {
-    salvar();
-    return true;
-  }
-  
-  try {
-    const response = await fetch(`${state.serverUrl}/api/vendas/${id}`, {
-      method: 'DELETE'
-    });
-    
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    await sincronizarDoServidor();
-    return true;
-  } catch (err) {
-    console.error('Erro ao deletar no servidor:', err);
-    salvar();
-    toast('⚠️ Deletado localmente', 'warning');
-    return false;
-  }
-}
-
-async function testarConexao() {
-  const url = document.getElementById('serverUrl').value.trim();
-  if (!url) {
-    toast('Digite uma URL válida', 'error');
-    return;
-  }
-  
-  try {
-    const response = await fetch(`${url}/api/health`, {
-      method: 'GET',
-      headers: { 'Accept': 'application/json' }
-    });
-    
-    if (response.ok) {
-      toast('✓ Conexão bem-sucedida!', 'success');
-      state.serverUrl = url;
-      localStorage.setItem('serverUrl', url);
-      atualizarStatusSincronizacao(true);
-    } else {
-      toast('✗ Servidor não respondeu corretamente', 'error');
-    }
-  } catch (err) {
-    toast('✗ Não foi possível conectar ao servidor', 'error');
-    atualizarStatusSincronizacao(false);
-  }
-}
-
-function salvarUrlServidor() {
-  const url = document.getElementById('serverUrl').value.trim();
-  if (url) {
-    state.serverUrl = url;
-    localStorage.setItem('serverUrl', url);
-    toast('URL salva com sucesso!');
-  }
-}
-
-function atualizarStatusSincronizacao(conectado = null) {
-  const badge = document.getElementById('statusBadge');
-  const statusText = document.getElementById('statusSync');
-  
-  if (conectado === null) conectado = state.serverUrl ? false : null;
-  
-  if (conectado === true) {
-    badge.className = 'status-badge status-online';
-    badge.innerHTML = '<div class="status-dot"></div><span>Sincronizado</span>';
-    statusText.textContent = `✓ Conectado a ${state.serverUrl}`;
-  } else if (conectado === false) {
-    badge.className = 'status-badge status-offline';
-    badge.innerHTML = '<div class="status-dot"></div><span>Desconectado</span>';
-    statusText.textContent = 'Usando dados locais (offline)';
-  } else {
-    badge.className = 'status-badge status-offline';
-    badge.innerHTML = '<div class="status-dot"></div><span>Local</span>';
-    statusText.textContent = 'Usando dados locais (sem servidor configurado)';
-  }
-}
-
-function calcularStorage() {
-  const totalSize = JSON.stringify(state.vendas).length + JSON.stringify(state.metas).length;
-  const totalMB = (totalSize / (1024 * 1024)).toFixed(2);
-  document.getElementById('storageInfo').textContent = `${totalSize} bytes (${totalMB} MB)`;
-}
-
-// ── RENDER METAS CONFIG ──
-function renderMetasConfig() {
-  const html = Object.entries(CATS).map(([key, cat]) => `
-    <div class="config-row">
-      <div>
-        <div class="config-label">${cat.icon} ${cat.nome}</div>
-        <div class="config-sub">Meta mensal</div>
-      </div>
-      <input type="number" id="meta-${key}" class="config-input" 
-             value="${state.metas[key] || 0}" min="0" step="100">
-    </div>
-  `).join('');
-  
-  document.getElementById('metasConfig').innerHTML = html;
-}
-
-function salvarMetas() {
-  Object.keys(state.metas).forEach(k => {
+function carregarConfigDoMes() {
+  const mes = getMesAtual();
+  Object.keys(mes.metas).forEach(k => {
     const el = document.getElementById('meta-' + k);
-    if (el) state.metas[k] = parseFloat(el.value) || 0;
+    if (el) el.value = mes.metas[k] || 0;
+  });
+  document.getElementById('diasUteis').value = mes.diasUteis || 22;
+  document.getElementById('diasPassados').value = mes.diasPassados || 0;
+}
+
+function salvar() { localStorage.setItem(KEY, JSON.stringify(state)); }
+
+// ── DIAS ──
+function atualizarDiasBadge() {
+  const mes = getMesAtual();
+  const restantes = Math.max(0, mes.diasUteis - mes.diasPassados);
+  const [ano, mês] = state.mesAtual.split('-');
+  const nomeMes = new Date(ano, parseInt(mês) - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  document.getElementById('diasBadge').textContent = `${nomeMes} • ${restantes} dias úteis restantes`;
+}
+
+function salvarDias() {
+  const mes = getMesAtual();
+  mes.diasUteis = parseInt(document.getElementById('diasUteis').value) || 22;
+  mes.diasPassados = parseInt(document.getElementById('diasPassados').value) || 0;
+  salvar();
+  atualizarDiasBadge();
+  renderDashboard();
+  toast('Dias atualizados!');
+}
+
+// ── METAS ──
+function salvarMetas() {
+  const mes = getMesAtual();
+  Object.keys(mes.metas).forEach(k => {
+    const el = document.getElementById('meta-' + k);
+    if (el) mes.metas[k] = parseFloat(el.value) || 0;
   });
   salvar();
   renderDashboard();
@@ -642,7 +511,8 @@ function updateVendaInput() {
   }
 }
 
-async function adicionarVenda() {
+function adicionarVenda() {
+  const mes = getMesAtual();
   const cat = document.getElementById('vendaCat').value;
   const cliente = document.getElementById('vendaCliente').value.trim();
   const valor = parseFloat(document.getElementById('vendaValor').value);
@@ -652,9 +522,8 @@ async function adicionarVenda() {
   if (!data) { toast('Informe a data!', 'error'); return; }
 
   const venda = { id: Date.now(), cat, cliente, valor, data };
-  state.vendas.push(venda);
-  
-  await salvarNoServidor(venda);
+  mes.vendas.push(venda);
+  salvar();
 
   // Reset form
   document.getElementById('vendaValor').value = '';
@@ -667,90 +536,33 @@ async function adicionarVenda() {
 }
 
 // ── TOTAL POR CATEGORIA ──
-function totalCat(cat, vendas = null) {
-  const lista = vendas || (state.filtroAplicado ? state.filtroVendas : state.vendas);
-  return lista.filter(v => v.cat === cat).reduce((s, v) => s + v.valor, 0);
-}
-
-// ── FILTRO DE VENDAS ──
-function aplicarFiltro() {
-  const dataDe = document.getElementById('filterDataDe').value;
-  const dataAte = document.getElementById('filterDataAte').value;
-  const categoria = document.getElementById('filterCat').value;
-
-  if (!dataDe || !dataAte) {
-    toast('Informe as duas datas!', 'error');
-    return;
-  }
-
-  state.filtroVendas = state.vendas.filter(v => {
-    const dataVenda = new Date(v.data);
-    const de = new Date(dataDe);
-    const ate = new Date(dataAte);
-    
-    const dataOk = dataVenda >= de && dataVenda <= ate;
-    const catOk = !categoria || v.cat === categoria;
-    
-    return dataOk && catOk;
-  });
-
-  state.filtroAplicado = true;
-  renderHistorico();
-  toast(`${state.filtroVendas.length} vendas encontradas`);
-}
-
-function limparFiltro() {
-  state.filtroAplicado = false;
-  state.filtroVendas = [];
-  document.getElementById('filterCat').value = '';
-  renderHistorico();
-  toast('Filtro limpo');
-}
-
-function exportarCSV() {
-  const vendas = state.filtroAplicado ? state.filtroVendas : state.vendas;
-  if (!vendas.length) {
-    toast('Nenhuma venda para exportar!', 'error');
-    return;
-  }
-
-  let csv = 'Data,Categoria,Cliente,Valor\n';
-  vendas.forEach(v => {
-    const data = new Date(v.data + 'T12:00:00').toLocaleDateString('pt-BR');
-    csv += `${data},${CATS[v.cat].nome},"${v.cliente || '-'}",${v.valor}\n`;
-  });
-
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = window.URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `vendas_${new Date().toISOString().split('T')[0]}.csv`;
-  a.click();
-  toast('CSV exportado!');
+function totalCat(cat) {
+  const mes = getMesAtual();
+  return mes.vendas.filter(v => v.cat === cat).reduce((s, v) => s + v.valor, 0);
 }
 
 // ── RENDER DASHBOARD ──
 function renderDashboard() {
-  const restantes = Math.max(1, state.diasUteis - state.diasPassados);
+  const mes = getMesAtual();
+  const restantes = Math.max(1, mes.diasUteis - mes.diasPassados);
   let totalVendido = 0;
   let totalMeta = 0;
   let totalFalta = 0;
   let batidas = 0;
 
-  const vendas = state.filtroAplicado ? state.filtroVendas : state.vendas;
-
   let html = '';
   Object.entries(CATS).forEach(([key, cat]) => {
-    const meta = state.metas[key] || 0;
-    const atual = vendas.filter(v => v.cat === key).reduce((s, v) => s + v.valor, 0);
+    const meta = mes.metas[key] || 0;
+    const atual = totalCat(key);
     const pct = meta > 0 ? Math.min(100, (atual / meta) * 100) : 0;
     const falta = Math.max(0, meta - atual);
     const porDia = restantes > 0 ? falta / restantes : 0;
 
-    totalVendido += atual;
-    totalMeta += meta;
-    totalFalta += falta;
-    
+    if (cat.tipo === 'valor') {
+      totalVendido += atual;
+      totalMeta += meta;
+      totalFalta += falta;
+    }
     if (atual >= meta && meta > 0) batidas++;
 
     let fillClass = pct >= 100 ? 'fill-green' : pct >= 60 ? 'fill-yellow' : 'fill-red';
@@ -758,7 +570,9 @@ function renderDashboard() {
     let badgeText = pct >= 100 ? '✓ Batida' : pct >= 60 ? 'No caminho' : 'Atenção';
     let statColor = pct >= 100 ? 'green' : pct >= 60 ? 'yellow' : 'red';
 
-    const formatVal = (v) => `R$ ${v.toLocaleString('pt-BR', {minimumFractionDigits:0, maximumFractionDigits:0})}`;
+    const formatVal = (v) => cat.tipo === 'qtd'
+      ? `${v.toFixed(0)} un`
+      : `R$ ${v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
 
     html += `
       <div class="meta-card">
@@ -796,18 +610,18 @@ function renderDashboard() {
 
 // ── RENDER HISTÓRICO ──
 function renderHistorico() {
+  const mes = getMesAtual();
   const list = document.getElementById('historicoList');
-  const vendas = state.filtroAplicado ? state.filtroVendas : state.vendas;
-  
-  if (!vendas.length) {
-    list.innerHTML = '<div class="empty-state">Nenhuma venda registrada.</div>';
+  if (!mes.vendas.length) {
+    list.innerHTML = '<div class="empty-state">Nenhuma venda registrada neste mês.</div>';
     return;
   }
-  
-  const sorted = [...vendas].sort((a,b) => b.id - a.id);
+  const sorted = [...mes.vendas].sort((a,b) => b.id - a.id);
   list.innerHTML = sorted.map(v => {
     const cat = CATS[v.cat];
-    const val = `R$ ${parseFloat(v.valor).toLocaleString('pt-BR', {minimumFractionDigits:0})}`;
+    const val = cat.tipo === 'qtd'
+      ? `${v.valor} un`
+      : `R$ ${parseFloat(v.valor).toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
     const data = new Date(v.data + 'T12:00:00').toLocaleDateString('pt-BR');
     return `
       <div class="venda-item">
@@ -826,25 +640,20 @@ function renderHistorico() {
   }).join('');
 }
 
-async function deletarVenda(id) {
+function deletarVenda(id) {
+  const mes = getMesAtual();
   if (!confirm('Remover esta venda?')) return;
-  state.vendas = state.vendas.filter(v => v.id !== id);
-  if (state.filtroAplicado) {
-    state.filtroVendas = state.filtroVendas.filter(v => v.id !== id);
-  }
-  
-  await deletarNoServidor(id);
+  mes.vendas = mes.vendas.filter(v => v.id !== id);
+  salvar();
   renderDashboard();
   renderHistorico();
   toast('Venda removida.');
 }
 
-async function limparMes() {
+function limparMes() {
+  const mes = getMesAtual();
   if (!confirm('Limpar TODAS as vendas deste mês? Esta ação não pode ser desfeita.')) return;
-  state.vendas = [];
-  state.filtroVendas = [];
-  state.filtroAplicado = false;
-  
+  mes.vendas = [];
   salvar();
   renderDashboard();
   renderHistorico();
@@ -856,6 +665,7 @@ function showPage(id, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
+  // find correct tab
   document.querySelectorAll('.tab').forEach(t => {
     if (t.getAttribute('onclick') && t.getAttribute('onclick').includes("'"+id+"'")) t.classList.add('active');
   });
@@ -865,7 +675,7 @@ function showPage(id, el) {
 function toast(msg, type = 'success') {
   const el = document.getElementById('toast');
   el.textContent = msg;
-  el.style.background = type === 'error' ? 'var(--red)' : type === 'warning' ? 'var(--yellow)' : 'var(--green)';
+  el.style.background = type === 'error' ? 'var(--red)' : 'var(--green)';
   el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), 2500);
 }
