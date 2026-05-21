@@ -192,6 +192,26 @@ main { padding: 1.5rem; max-width: 900px; margin: 0 auto; }
 </head>
 <body>
 
+  <script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyDCvRhk-_LgXIuHlv9e48pdZ6DzcUuaSVM",
+    authDomain: "ramsons-metas.firebaseapp.com",
+    projectId: "ramsons-metas",
+    storageBucket: "ramsons-metas.firebasestorage.app",
+    messagingSenderId: "843371761237",
+    appId: "1:843371761237:web:02ca33935a23decbe38edc"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+</script>
+
 <header>
   <div class="logo">Ramsons <span>Metas</span></div>
   <div class="header-info">
